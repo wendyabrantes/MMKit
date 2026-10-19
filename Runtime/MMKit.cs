@@ -80,6 +80,26 @@ namespace MightyMinds.Kit
             ReviewPrompter.MarkFirstLaunch();
         }
 
+        /// <summary>True while a kit overlay (gate, settings) is on screen. Games that read the pointer directly
+        /// (instead of through uGUI) should ignore input while this is true.</summary>
+        public static bool IsOverlayOpen => KitView.OpenCount > 0;
+
+        /// <summary>True when a screen position is over kit UI (an open overlay or the settings button).</summary>
+        public static bool IsOverKitUi(Vector2 screenPosition)
+        {
+            if (IsOverlayOpen) return true;
+            var es = UnityEngine.EventSystems.EventSystem.current;
+            if (es == null) return false;
+
+            var data = new UnityEngine.EventSystems.PointerEventData(es) { position = screenPosition };
+            var hits = new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            es.RaycastAll(data, hits);
+            foreach (var hit in hits)
+                if (hit.gameObject != null && hit.gameObject.transform.root.name.StartsWith("MMKit_"))
+                    return true;
+            return false;
+        }
+
         /// <summary>Run <paramref name="onPass"/> once a grown-up solves the gate.</summary>
         public static void RequireGate(Action onPass, Action onCancel = null, string title = null)
         {
