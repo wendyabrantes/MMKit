@@ -1,0 +1,14 @@
+{
+  "name": "com.mightyminds.kit",
+  "version": "0.1.0",
+  "displayName": "Mighty Minds Kit",
+  "description": "Shared kids-app essentials: parental gate, settings (sound/music), about, store review prompts and offer-code redemption.",
+  "unity": "6000.0",
+  "author": {
+    "name": "Mighty Minds"
+  },
+  "dependencies": {
+    "com.unity.ugui": "2.0.0"
+  },
+  "keywords": ["kids", "parental-gate", "settings", "review", "offer-code"]
+}
