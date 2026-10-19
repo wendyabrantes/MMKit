@@ -20,7 +20,7 @@ namespace MightyMinds.Kit
         Rect lastSafe;
         int lastWidth, lastHeight;
 
-        public static SettingsButton Create(Corner corner = Corner.TopRight, float size = 110f, float margin = 30f)
+        public static SettingsButton Create(Corner corner = Corner.TopRight, float size = 130f, float margin = 30f)
         {
             KitUI.EnsureEventSystem();
             var go = new GameObject("MMKit_SettingsButton");
@@ -38,22 +38,36 @@ namespace MightyMinds.Kit
             sb.scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             go.AddComponent<GraphicRaycaster>();
 
-            var bg = KitUI.Box("Button", go.transform, new Color(0.15f, 0.12f, 0.10f, 0.45f));
-            bg.pixelsPerUnitMultiplier = 48f / size;   // rounds the corners into a circle
+            var icon = MMKit.Config.SettingsIcon != null
+                ? MMKit.Config.SettingsIcon
+                : Resources.Load<Sprite>("MMKit/settings_icon");
+
+            var bg = KitUI.Box("Button", go.transform, icon != null ? Color.white : new Color(0.15f, 0.12f, 0.10f, 0.45f),
+                rounded: icon == null);
             sb.button = bg.rectTransform;
             sb.button.sizeDelta = new Vector2(size, size);
+
+            if (icon != null)
+            {
+                bg.sprite = icon;               // the designed icon already includes its own circle and gear
+                bg.preserveAspect = true;
+            }
+            else
+            {
+                bg.pixelsPerUnitMultiplier = 48f / size;   // rounds the corners into a circle
+
+                var gear = KitUI.Rect("Gear", bg.transform);
+                var gearImg = gear.gameObject.AddComponent<Image>();
+                gearImg.sprite = GearSprite();
+                gearImg.color = new Color(1f, 1f, 1f, 0.9f);
+                gearImg.raycastTarget = false;
+                gear.anchorMin = gear.anchorMax = new Vector2(0.5f, 0.5f);
+                gear.sizeDelta = new Vector2(size * 0.62f, size * 0.62f);
+            }
 
             var btn = bg.gameObject.AddComponent<Button>();
             btn.targetGraphic = bg;
             btn.onClick.AddListener(MMKit.ShowSettings);
-
-            var gear = KitUI.Rect("Gear", bg.transform);
-            var gearImg = gear.gameObject.AddComponent<Image>();
-            gearImg.sprite = GearSprite();
-            gearImg.color = new Color(1f, 1f, 1f, 0.9f);
-            gearImg.raycastTarget = false;
-            gear.anchorMin = gear.anchorMax = new Vector2(0.5f, 0.5f);
-            gear.sizeDelta = new Vector2(size * 0.62f, size * 0.62f);
 
             sb.Layout();
             return sb;

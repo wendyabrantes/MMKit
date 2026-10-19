@@ -44,6 +44,7 @@ namespace MightyMinds.Kit
         public Color Muted     = new Color(0.62f, 0.60f, 0.58f);
         public Color CardColor = new Color(1.00f, 0.98f, 0.94f);
         public Color TextColor = new Color(0.22f, 0.16f, 0.10f);
+        public Sprite SettingsIcon = null;                   // null = bundled icon
         public int   SortingOrder = 32000;
     }
 
