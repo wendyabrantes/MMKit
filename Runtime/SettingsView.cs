@@ -26,8 +26,9 @@ namespace MightyMinds.Kit
             if (startOnAbout) BuildAbout(); else BuildMain();
         }
 
-        void OnDestroy()
+        protected override void OnDestroy()
         {
+            base.OnDestroy();
             MMKit.InGatedSession = false;
             Closed?.Invoke();
         }

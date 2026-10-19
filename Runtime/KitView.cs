@@ -14,6 +14,9 @@ namespace MightyMinds.Kit
     {
         protected const float CardWidth = 900f;
 
+        /// <summary>Number of kit overlays currently on screen.</summary>
+        internal static int OpenCount;
+
         CanvasScaler scaler;
         CanvasGroup group;
         bool closing;
@@ -30,6 +33,7 @@ namespace MightyMinds.Kit
             canvas.sortingOrder = MMKit.Config.SortingOrder;
 
             var v = go.AddComponent<T>();
+            OpenCount++;
             v.scaler = go.AddComponent<CanvasScaler>();
             v.scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             v.scaler.referenceResolution = new Vector2(1080f, 1080f);
@@ -90,6 +94,8 @@ namespace MightyMinds.Kit
             Destroy(gameObject);
             after?.Invoke();
         }
+
+        protected virtual void OnDestroy() => OpenCount--;
 
         void Update() => UpdateScaleMatch();
 

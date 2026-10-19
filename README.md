@@ -12,6 +12,7 @@ scenes to set up) and works in portrait and landscape.
 | Store rating prompt with a sensible policy | `ReviewPrompter.RegisterCompletion()` then `ReviewPrompter.MaybePrompt()` |
 | "Rate us" button (store review page) | `MMKit.RateApp()` |
 | Discount / offer code redemption | `MMKit.RedeemCode()` |
+| Corner gear button that opens settings | `SettingsButton.Create(SettingsButton.Corner.TopRight)` |
 
 ## Install
 

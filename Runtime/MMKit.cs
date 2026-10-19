@@ -57,6 +57,7 @@ namespace MightyMinds.Kit
 
         public static void Initialize(MMKitConfig config)
         {
+            KitView.OpenCount = 0;
             Config = config ?? new MMKitConfig();
             if (string.IsNullOrEmpty(Config.AppName)) Config.AppName = Application.productName;
             ReviewPrompter.MarkFirstLaunch();
@@ -65,6 +66,7 @@ namespace MightyMinds.Kit
         /// <summary>Run <paramref name="onPass"/> once a grown-up solves the gate.</summary>
         public static void RequireGate(Action onPass, Action onCancel = null, string title = null)
         {
+            if (KitView.OpenCount > 0) return;   // one overlay at a time (ignores repeated taps)
             GateView.Show(title, onPass, onCancel);
         }
 
