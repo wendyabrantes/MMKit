@@ -400,7 +400,7 @@ namespace MightyMinds.Kit
             void Refresh()
             {
                 bool on = get();
-                track.color = on ? cfg.Primary : new Color32(0xC9, 0xDF, 0xFF, 255);
+                track.color = on ? cfg.Primary : Color.Lerp(cfg.Primary, Color.white, 0.75f);
                 kr.anchorMin = kr.anchorMax = kr.pivot = new Vector2(on ? 1f : 0f, 0.5f);
                 kr.anchoredPosition = new Vector2(on ? -9f : 9f, 0f);
             }
