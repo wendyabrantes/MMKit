@@ -114,7 +114,7 @@ namespace MightyMinds.Kit
 
         protected virtual void OnDestroy() => OpenCount--;
 
-        void Update() => UpdateScaleMatch();
+        protected virtual void Update() => UpdateScaleMatch();
 
         void UpdateScaleMatch()
         {

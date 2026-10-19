@@ -11,8 +11,6 @@ namespace MightyMinds.Kit
     {
         public enum Corner { TopLeft, TopRight, BottomLeft, BottomRight }
 
-        static Sprite gearSprite;
-
         CanvasScaler scaler;
         RectTransform button;
         Corner corner;
@@ -58,7 +56,7 @@ namespace MightyMinds.Kit
 
                 var gear = KitUI.Rect("Gear", bg.transform);
                 var gearImg = gear.gameObject.AddComponent<Image>();
-                gearImg.sprite = GearSprite();
+                gearImg.sprite = KitIcons.Gear;
                 gearImg.color = new Color(1f, 1f, 1f, 0.9f);
                 gearImg.raycastTarget = false;
                 gear.anchorMin = gear.anchorMax = new Vector2(0.5f, 0.5f);
@@ -103,38 +101,6 @@ namespace MightyMinds.Kit
             button.anchoredPosition = new Vector2(
                 (isRight ? -1f : 1f) * ((isRight ? right : left) + margin),
                 (isTop ? -1f : 1f) * ((isTop ? top : bottom) + margin));
-        }
-
-        static Sprite GearSprite()
-        {
-            if (gearSprite != null) return gearSprite;
-            const int size = 128;
-            const int teeth = 8;
-            var tex = new Texture2D(size, size, TextureFormat.RGBA32, false)
-            {
-                wrapMode = TextureWrapMode.Clamp,
-                filterMode = FilterMode.Bilinear,
-                hideFlags = HideFlags.HideAndDontSave
-            };
-            var px = new Color32[size * size];
-            float c = size / 2f;
-            for (int y = 0; y < size; y++)
-            for (int x = 0; x < size; x++)
-            {
-                float dx = x + 0.5f - c, dy = y + 0.5f - c;
-                float r = Mathf.Sqrt(dx * dx + dy * dy);
-                float angle = Mathf.Atan2(dy, dx);
-                float tooth = Mathf.Clamp01((Mathf.Cos(angle * teeth) + 0.35f) * 3f);
-                float outer = 38f + 22f * tooth;               // body radius with teeth
-                float a = Mathf.Clamp01(outer - r + 0.5f);      // outside edge
-                a *= Mathf.Clamp01(r - 17f + 0.5f);             // centre hole
-                px[y * size + x] = new Color(1f, 1f, 1f, a);
-            }
-            tex.SetPixels32(px);
-            tex.Apply();
-            gearSprite = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
-            gearSprite.hideFlags = HideFlags.HideAndDontSave;
-            return gearSprite;
         }
     }
 }

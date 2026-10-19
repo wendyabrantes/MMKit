@@ -13,6 +13,13 @@ namespace MightyMinds.Kit
         public string IconResource;
     }
 
+    /// <summary>One question and answer on the FAQ page.</summary>
+    public sealed class FaqItem
+    {
+        public string Question;
+        public string Answer;
+    }
+
     /// <summary>
     /// One-time setup for the kit. Fill in what the game needs and pass it to
     /// <see cref="MMKit.Initialize"/> at startup.
@@ -34,6 +41,10 @@ namespace MightyMinds.Kit
         public string AboutIntro     = null;
         public string AboutDescription = null;
         public AboutFeature[] AboutFeatures = null;
+        /// <summary>FAQ page entries; null uses generic defaults. Edit them to match the game.</summary>
+        public FaqItem[] FaqItems = null;
+        /// <summary>"More Q&As" link on the FAQ page; null falls back to WebsiteUrl (button hidden if both are empty).</summary>
+        public string FaqUrl = null;
 
         // ── Behaviour ─────────────────────────────────────────────────────────
         /// <summary>Require the parental gate before the settings panel opens.</summary>
@@ -53,10 +64,11 @@ namespace MightyMinds.Kit
 
         // ── Look ──────────────────────────────────────────────────────────────
         public TMP_FontAsset Font = null;                    // null = TMP default
-        // Defaults follow the Mighty Minds puzzle game's About screen.
+        // Gate defaults follow the Mighty Minds puzzle game; the parent area uses Primary / Positive.
+        public Color Primary   = new Color32(0x4A, 0x96, 0xFF, 255);   // blue: sidebar, links, toggle
         public Color Accent    = new Color32(0xA4, 0x5E, 0xE5, 255);   // purple
         public Color Secondary = new Color32(0xDF, 0x6B, 0xD5, 255);   // pink
-        public Color Positive  = new Color32(0x25, 0xB0, 0x5A, 255);
+        public Color Positive  = new Color32(0x5F, 0xDD, 0x66, 255);   // green banners, gate success
         public Color Muted     = new Color32(0x63, 0x6E, 0x72, 255);   // grey text
         public Color CardColor = Color.white;
         public Color TextColor = new Color32(0x2D, 0x34, 0x36, 255);
