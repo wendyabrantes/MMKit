@@ -50,7 +50,7 @@ namespace MightyMinds.Kit
             Card.sizeDelta = new Vector2(cardWidth, 600f);
 
             // Bottom bar contents decide how much room the scroll area gives up.
-            int buttons = 2 + (cfg.RestorePurchases != null ? 1 : 0);
+            int buttons = 1 + (cfg.RestorePurchases != null ? 1 : 0);
             float barHeight = 18f + buttons * ButtonHeight + (buttons - 1) * BarSpacing + 38f;
 
             var content = BuildScrollArea(barHeight);
@@ -187,8 +187,6 @@ namespace MightyMinds.Kit
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = false;
 
-            AddToggle(bar, MMKit.T("kit.settings.sound", "Sound"), cfg.Accent,
-                () => KitSettings.SoundEnabled, v => KitSettings.SoundEnabled = v);
             AddToggle(bar, MMKit.T("kit.settings.music", "Music"), cfg.Accent,
                 () => KitSettings.MusicEnabled, v => KitSettings.MusicEnabled = v);
 

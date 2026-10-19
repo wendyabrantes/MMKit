@@ -4,21 +4,14 @@ using UnityEngine;
 namespace MightyMinds.Kit
 {
     /// <summary>
-    /// Player-facing audio preferences, persisted in PlayerPrefs. Games read these (or subscribe to
+    /// Player-facing music preference, persisted in PlayerPrefs. Games read these (or subscribe to
     /// <see cref="Changed"/>) and apply them to their own audio system.
     /// </summary>
     public static class KitSettings
     {
-        const string SoundKey = "mmkit.sound";
         const string MusicKey = "mmkit.music";
 
         public static event Action Changed;
-
-        public static bool SoundEnabled
-        {
-            get => PlayerPrefs.GetInt(SoundKey, 1) == 1;
-            set => Set(SoundKey, value);
-        }
 
         public static bool MusicEnabled
         {

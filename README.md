@@ -6,9 +6,9 @@ scenes to set up) and works in portrait and landscape.
 | Feature | API |
 |---|---|
 | Parental gate (two-digit sum, 3 tries) | `MMKit.RequireGate(onPass, onCancel, title)` |
-| Settings: sound / music, rate, redeem code, restore, about | `MMKit.ShowSettings()` |
+| Settings: music, rate, redeem code, restore, about | `MMKit.ShowSettings()` |
 | About page (version, company, links) | `MMKit.ShowAbout()` |
-| Sound / music preference (saved) | `KitSettings.SoundEnabled`, `KitSettings.MusicEnabled`, `KitSettings.Changed` |
+| Music preference (saved) | `KitSettings.MusicEnabled`, `KitSettings.Changed` |
 | Store rating prompt with a sensible policy | `ReviewPrompter.RegisterCompletion()` then `ReviewPrompter.MaybePrompt()` |
 | "Rate us" button (store review page) | `MMKit.RateApp()` |
 | Discount / offer code redemption | `MMKit.RedeemCode()` |
@@ -58,8 +58,7 @@ preferences:
 ```csharp
 void OnEnable()  { KitSettings.Changed += Apply; Apply(); }
 void OnDisable() { KitSettings.Changed -= Apply; }
-void Apply()     { audioManager.SetSoundEnabled(KitSettings.SoundEnabled);
-                   audioManager.SetMusicEnabled(KitSettings.MusicEnabled); }
+void Apply()     { audioManager.SetMusicEnabled(KitSettings.MusicEnabled); }
 ```
 
 ## Reviews
@@ -84,7 +83,7 @@ transactions that start outside the app.
 ## Localisation keys
 
 Pass `Localize` to translate. Keys: `kit.gate.title`, `kit.gate.hint`, `kit.review.gate_title`,
-`kit.settings.title|sound|music|rate|redeem|restore|about`, `kit.about.version|made_by|website|privacy|terms|contact`,
+`kit.settings.title|music|rate|redeem|restore|about`, `kit.about.version|made_by|website|privacy|terms|contact`,
 `kit.common.on|off|close|back|cancel`.
 
 ## Notes
