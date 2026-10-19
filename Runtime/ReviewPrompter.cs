@@ -49,7 +49,7 @@ namespace MightyMinds.Kit
             MMKit.RequireGate(
                 () => { RequestReview(); onDone?.Invoke(); },
                 () => onDone?.Invoke(),
-                MMKit.T("kit.review.gate_title", "Grown-ups: enjoying the game?\nSolve this to leave a rating"));
+                MMKit.T("kit.review.gate_title", "Grown-ups: solve this to leave us a rating"));
             return true;
         }
 
