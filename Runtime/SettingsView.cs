@@ -635,9 +635,8 @@ namespace MightyMinds.Kit
 
         static class Defaults
         {
-            public const string Intro = "Mighty Minds creates learning apps that kids actually want to use.";
-            public const string Description =
-                "We develop apps optimised for mobile and tablet, so learning can happen whether your child is at home or on the go.";
+            public const string Intro = "Mighty Minds builds fun, thoughtful learning apps for kids designed for the devices they already love.";
+            public const string Description = "We\u2019re two friends who believe learning should feel like play.";
 
             public static AboutFeature[] Features() => new[]
             {
