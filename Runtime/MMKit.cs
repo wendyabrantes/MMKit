@@ -4,6 +4,15 @@ using UnityEngine;
 
 namespace MightyMinds.Kit
 {
+    /// <summary>One card on the settings screen ("Built for little hands" ...).</summary>
+    public sealed class AboutFeature
+    {
+        public string Title;
+        public string Description;
+        /// <summary>Resources path of a small icon, e.g. "MMKit/hand_icon".</summary>
+        public string IconResource;
+    }
+
     /// <summary>
     /// One-time setup for the kit. Fill in what the game needs and pass it to
     /// <see cref="MMKit.Initialize"/> at startup.
@@ -19,6 +28,12 @@ namespace MightyMinds.Kit
         public string PrivacyPolicyUrl = null;
         public string TermsUrl       = null;
         public string SupportEmail   = null;
+        /// <summary>Logo shown at the top of the settings screen. Null loads Resources/MMKit/logo if present.</summary>
+        public Sprite Logo           = null;
+        /// <summary>Settings screen copy; null uses the Mighty Minds defaults.</summary>
+        public string AboutIntro     = null;
+        public string AboutDescription = null;
+        public AboutFeature[] AboutFeatures = null;
 
         // ── Behaviour ─────────────────────────────────────────────────────────
         /// <summary>Require the parental gate before the settings panel opens.</summary>
@@ -38,12 +53,13 @@ namespace MightyMinds.Kit
 
         // ── Look ──────────────────────────────────────────────────────────────
         public TMP_FontAsset Font = null;                    // null = TMP default
-        public Color Accent    = new Color(0.98f, 0.55f, 0.20f);
-        public Color Secondary = new Color(0.30f, 0.62f, 0.95f);
-        public Color Positive  = new Color(0.25f, 0.70f, 0.35f);
-        public Color Muted     = new Color(0.62f, 0.60f, 0.58f);
-        public Color CardColor = new Color(1.00f, 0.98f, 0.94f);
-        public Color TextColor = new Color(0.22f, 0.16f, 0.10f);
+        // Defaults follow the Mighty Minds puzzle game's About screen.
+        public Color Accent    = new Color32(0xA4, 0x5E, 0xE5, 255);   // purple
+        public Color Secondary = new Color32(0xDF, 0x6B, 0xD5, 255);   // pink
+        public Color Positive  = new Color32(0x25, 0xB0, 0x5A, 255);
+        public Color Muted     = new Color32(0x63, 0x6E, 0x72, 255);   // grey text
+        public Color CardColor = Color.white;
+        public Color TextColor = new Color32(0x2D, 0x34, 0x36, 255);
         public Sprite SettingsIcon = null;                   // null = bundled icon
         public int   SortingOrder = 32000;
     }
@@ -74,12 +90,12 @@ namespace MightyMinds.Kit
         /// <summary>Open the settings panel (behind the parental gate unless disabled in the config).</summary>
         public static void ShowSettings()
         {
-            if (Config.GateSettings) RequireGate(() => SettingsView.Show(false));
-            else SettingsView.Show(false);
+            if (Config.GateSettings) RequireGate(SettingsView.Show);
+            else SettingsView.Show();
         }
 
-        /// <summary>Open the about page (behind the parental gate).</summary>
-        public static void ShowAbout() => Gated(() => SettingsView.Show(true));
+        /// <summary>Open the settings / about screen (behind the parental gate).</summary>
+        public static void ShowAbout() => Gated(SettingsView.Show);
 
         /// <summary>Send the player to the store's "write a review" page (gated).</summary>
         public static void RateApp() => Gated(ReviewPrompter.OpenStoreReviewPage);

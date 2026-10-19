@@ -20,7 +20,7 @@ namespace MightyMinds.Kit
         CanvasScaler scaler;
         CanvasGroup group;
         bool closing;
-        protected RectTransform Card { get; private set; }
+        protected RectTransform Card { get; set; }
 
         protected static T Create<T>(string name) where T : KitView
         {
@@ -53,10 +53,27 @@ namespace MightyMinds.Kit
             StartCoroutine(KitUI.Fade(group, 0f, 1f, 0.2f));
         }
 
+        /// <summary>Canvas size in units (the shorter edge is always 1080).</summary>
+        protected static Vector2 CanvasSize
+        {
+            get
+            {
+                float shortEdge = Mathf.Min(Screen.width, Screen.height);
+                float longEdge = 1080f * Mathf.Max(Screen.width, Screen.height) / Mathf.Max(1f, shortEdge);
+                return Screen.width > Screen.height ? new Vector2(longEdge, 1080f) : new Vector2(1080f, longEdge);
+            }
+        }
+
+        protected Image MakeBackdrop(float alpha = 0.65f)
+        {
+            var backdrop = KitUI.Box("Backdrop", transform, new Color(0f, 0f, 0f, alpha), rounded: false);
+            KitUI.Stretch(backdrop.rectTransform);
+            return backdrop;
+        }
+
         protected void MakeCard()
         {
-            var backdrop = KitUI.Box("Backdrop", transform, new Color(0f, 0f, 0f, 0.65f), rounded: false);
-            KitUI.Stretch(backdrop.rectTransform);
+            MakeBackdrop();
 
             var cardImg = KitUI.Box("Card", transform, MMKit.Config.CardColor);
             Card = cardImg.rectTransform;
@@ -81,7 +98,7 @@ namespace MightyMinds.Kit
                 Destroy(Card.GetChild(i).gameObject);
         }
 
-        protected void Close(Action after = null)
+        protected internal void Close(Action after = null)
         {
             if (closing) return;
             closing = true;

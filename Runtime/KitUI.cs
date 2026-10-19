@@ -68,13 +68,39 @@ namespace MightyMinds.Kit
             rt.offsetMin = rt.offsetMax = Vector2.zero;
         }
 
-        public static Image Box(string name, Transform parent, Color color, bool rounded = true)
+        /// <summary>A flat or rounded box. <paramref name="radius"/> is the corner radius in canvas units.</summary>
+        public static Image Box(string name, Transform parent, Color color, bool rounded = true, float radius = 24f)
         {
             var rt = Rect(name, parent);
             var img = rt.gameObject.AddComponent<Image>();
             img.color = color;
-            if (rounded) { img.sprite = Round; img.type = Image.Type.Sliced; }
+            if (rounded)
+            {
+                img.sprite = Round;
+                img.type = Image.Type.Sliced;
+                img.pixelsPerUnitMultiplier = 24f / Mathf.Max(1f, radius);
+            }
             return img;
+        }
+
+        static readonly System.Collections.Generic.Dictionary<string, Sprite> spriteCache =
+            new System.Collections.Generic.Dictionary<string, Sprite>();
+
+        /// <summary>Loads a Resources texture (or sprite) as a sprite; null when it does not exist.</summary>
+        public static Sprite LoadSprite(string resourcePath)
+        {
+            if (string.IsNullOrEmpty(resourcePath)) return null;
+            if (spriteCache.TryGetValue(resourcePath, out var cached) && cached != null) return cached;
+
+            var sprite = Resources.Load<Sprite>(resourcePath);
+            if (sprite == null)
+            {
+                var tex = Resources.Load<Texture2D>(resourcePath);
+                if (tex != null)
+                    sprite = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            spriteCache[resourcePath] = sprite;
+            return sprite;
         }
 
         public static TextMeshProUGUI Label(Transform parent, string text, float size, Color color,
@@ -100,9 +126,9 @@ namespace MightyMinds.Kit
         }
 
         public static Button MakeButton(Transform parent, string text, Color color, Action onClick,
-            float fontSize = 40f, float height = -1f)
+            float fontSize = 40f, float height = -1f, float radius = 24f)
         {
-            var img = Box(text + "_Button", parent, color);
+            var img = Box(text + "_Button", parent, color, true, radius);
             var btn = img.gameObject.AddComponent<Button>();
             btn.targetGraphic = img;
             var colors = btn.colors;
