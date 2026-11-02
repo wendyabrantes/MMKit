@@ -56,6 +56,14 @@ namespace MightyMinds.Kit
         /// <summary>Called with (key, englishFallback); return the localised string or null to use the fallback.</summary>
         public Func<string, string, string> Localize = null;
 
+        // ── Analytics (optional) ──────────────────────────────────────────────
+        /// <summary>PostHog project API key (starts with "phc_"). Null or empty = analytics off.</summary>
+        public string AnalyticsKey  = null;
+        /// <summary>PostHog ingestion host: https://eu.i.posthog.com (EU) or https://us.i.posthog.com (US).</summary>
+        public string AnalyticsHost = "https://eu.i.posthog.com";
+        /// <summary>Tells analytics whether a game id is in the free set, so events carry a "free" flag.</summary>
+        public Func<string, bool> IsGameFree = null;
+
         // ── Review prompt policy ──────────────────────────────────────────────
         public int MinCompletedActivities = 3;
         public int MinDaysSinceInstall    = 2;
@@ -90,6 +98,7 @@ namespace MightyMinds.Kit
             Config = config ?? new MMKitConfig();
             if (string.IsNullOrEmpty(Config.AppName)) Config.AppName = Application.productName;
             ReviewPrompter.MarkFirstLaunch();
+            KitAnalytics.Initialize();
         }
 
         /// <summary>True while a kit overlay (gate, settings) is on screen. Games that read the pointer directly

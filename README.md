@@ -90,4 +90,17 @@ Pass `Localize` to translate. Keys: `kit.gate.title`, `kit.gate.hint`, `kit.revi
 
 - Parental gate is required in front of external links, purchases and rating prompts in the Apple
   Kids category. The settings panel is gated once on open, so its buttons skip a second gate.
-- No analytics or tracking is included.
+- Analytics is optional and off until `MMKitConfig.AnalyticsKey` is set (see below). No advertising ID, no
+  persistent user or device ID.
+
+## Analytics (PostHog)
+
+Set `AnalyticsKey` (and `AnalyticsHost` for US projects) in `MMKitConfig`, then call:
+
+- `KitAnalytics.GameStarted(game, round)` / `GameCompleted(game, round, seconds)`
+- `KitAnalytics.PaywallShown(sourceGame)` / `PurchaseCompleted(sourceGame, productId)`
+
+Provide `IsGameFree` so game events carry a `free` flag. In PostHog, build insights on `game_started`
+(breakdown by `game`, filter `free = true` for the most-played free game, `free = false` for paid), and on
+`paywall_shown` / `purchase_completed` broken down by `source_game` to see which game triggers the unlock.
+In PostHog project settings, also turn on "Discard client IP data".
