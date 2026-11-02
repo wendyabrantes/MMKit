@@ -76,9 +76,9 @@ namespace MightyMinds.Kit
             => Track("game_started", ("game", game), ("round", round), ("round_name", roundName), FreeFlag(game));
 
         /// <summary>A round was finished.</summary>
-        public static void GameCompleted(string game, int round, float seconds, string roundName = null)
+        public static void GameCompleted(string game, int round, float seconds, string roundName = null, bool? finalRound = null)
             => Track("game_completed", ("game", game), ("round", round), ("round_name", roundName),
-                ("seconds", Mathf.Round(seconds)), FreeFlag(game));
+                ("seconds", Mathf.Round(seconds)), ("final_round", finalRound), FreeFlag(game));
 
         /// <summary>The child restarted a round. <paramref name="midRound"/> is true when it was not yet won (a sign of being stuck).</summary>
         public static void GameRetried(string game, int round, float seconds, bool midRound, string roundName = null)
