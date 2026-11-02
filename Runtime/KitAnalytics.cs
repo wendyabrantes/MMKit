@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -67,7 +68,95 @@ namespace MightyMinds.Kit
                 runner = go.AddComponent<Runner>();
             }
             Track("app_open");
+
+            if (MMKit.Config.AnalyticsErrors)
+            {
+                Application.logMessageReceived -= OnLog;
+                Application.logMessageReceived += OnLog;
+            }
         }
+
+        // ── Error tracking ────────────────────────────────────────────────────
+
+        const int MaxErrorsPerSession = 25;
+        static readonly HashSet<string> seenErrors = new HashSet<string>();
+        static int errorCount;
+        static bool inErrorHandler;
+        static readonly Regex FrameWithFile = new Regex(@"^(?<fn>.+?)\s*\(at (?<file>.+?):(?<line>\d+)\)\s*$", RegexOptions.Compiled);
+
+        /// <summary>Extra properties added to every error event (for example the game being played).</summary>
+        public static Func<(string key, object value)[]> ErrorContext;
+
+        static void OnLog(string condition, string stackTrace, LogType type)
+        {
+            if (type != LogType.Exception && type != LogType.Error) return;
+            if (inErrorHandler || !IsConfigured) return;
+
+            // The same error repeating every frame must not flood the project: send each once, capped per session
+            string fingerprint = (condition ?? "") + "|" + FirstLine(stackTrace);
+            if (errorCount >= MaxErrorsPerSession || !seenErrors.Add(fingerprint)) return;
+            errorCount++;
+
+            inErrorHandler = true;
+            try
+            {
+                string name = "LogError";
+                string message = condition ?? "";
+                if (type == LogType.Exception)
+                {
+                    // Unity formats exceptions as "TypeName: message"
+                    int colon = message.IndexOf(':');
+                    if (colon > 0 && colon < 80) { name = message.Substring(0, colon).Trim(); message = message.Substring(colon + 1).Trim(); }
+                    else name = "Exception";
+                }
+                if (message.Length > 500) message = message.Substring(0, 500);
+
+                var frames = new StringBuilder("[");
+                bool first = true;
+                foreach (var raw in (stackTrace ?? "").Split('\n'))
+                {
+                    string line = raw.Trim();
+                    if (line.Length == 0) continue;
+                    var m = FrameWithFile.Match(line);
+                    if (!first) frames.Append(',');
+                    first = false;
+                    frames.Append("{\"platform\":\"custom\",\"lang\":\"csharp\",\"resolved\":true,\"in_app\":")
+                          .Append(line.StartsWith("UnityEngine.") || line.StartsWith("UnityEditor.") || line.StartsWith("System.") ? "false" : "true")
+                          .Append(",\"function\":").Append(Quote(m.Success ? m.Groups["fn"].Value : line));
+                    if (m.Success)
+                        frames.Append(",\"filename\":").Append(Quote(m.Groups["file"].Value))
+                              .Append(",\"lineno\":").Append(m.Groups["line"].Value);
+                    frames.Append('}');
+                }
+                frames.Append(']');
+
+                string list = "[{\"type\":" + Quote(name) + ",\"value\":" + Quote(message) +
+                              ",\"mechanism\":{\"handled\":false,\"synthetic\":false}" +
+                              ",\"stacktrace\":{\"type\":\"resolved\",\"frames\":" + frames + "}}]";
+
+                var extra = new List<(string, object)>
+                {
+                    ("$exception_list", new Raw(list)),
+                    ("$exception_level", type == LogType.Exception ? "error" : "warning"),
+                    ("scene", UnityEngine.SceneManagement.SceneManager.GetActiveScene().name),
+                };
+                var context = ErrorContext?.Invoke();
+                if (context != null) extra.AddRange(context);
+                Track("$exception", extra.ToArray());
+            }
+            catch { /* error reporting must never throw */ }
+            finally { inErrorHandler = false; }
+        }
+
+        static string FirstLine(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            int i = s.IndexOf('\n');
+            return i < 0 ? s : s.Substring(0, i);
+        }
+
+        /// <summary>Pre-serialised JSON, passed through untouched.</summary>
+        sealed class Raw { public readonly string Json; public Raw(string json) { Json = json; } }
 
         // ── Events the games call ─────────────────────────────────────────────
 
@@ -176,6 +265,7 @@ namespace MightyMinds.Kit
         {
             switch (v)
             {
+                case Raw raw: return raw.Json;
                 case bool b: return b ? "true" : "false";
                 case int i: return i.ToString(CultureInfo.InvariantCulture);
                 case long l: return l.ToString(CultureInfo.InvariantCulture);

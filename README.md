@@ -104,6 +104,11 @@ Set `AnalyticsKey` (and `AnalyticsHost` for US projects) in `MMKitConfig`, then 
 Every event carries `environment` (`editor`, `development`, `testflight` or `production`, detected automatically; override with
 `AnalyticsEnvironment`). Filter dashboards on `environment = production`.
 
+Unhandled exceptions and `Debug.LogError` are sent as PostHog `$exception` events (Error tracking), once each
+and capped per session; turn off with `AnalyticsErrors = false`. Set `KitAnalytics.ErrorContext` to attach
+extra properties such as the current game. Native crashes (app killed by iOS) are not captured; use Xcode
+Organizer / App Store Connect for those.
+
 Provide `IsGameFree` so game events carry a `free` flag. In PostHog, build insights on `game_started`
 (breakdown by `game`, filter `free = true` for the most-played free game, `free = false` for paid), and on
 `paywall_shown` / `purchase_completed` broken down by `source_game` to see which game triggers the unlock.
