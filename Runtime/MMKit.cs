@@ -61,6 +61,9 @@ namespace MightyMinds.Kit
         public string AnalyticsKey  = null;
         /// <summary>PostHog ingestion host: https://eu.i.posthog.com (EU) or https://us.i.posthog.com (US).</summary>
         public string AnalyticsHost = "https://eu.i.posthog.com";
+        /// <summary>When true, PostHog may work out the player's country from the IP address (the IP is not stored if
+        /// "Discard client IP data" is on in the project). Mention it in the privacy policy. Default: off.</summary>
+        public bool AnalyticsCountry = false;
         /// <summary>Tells analytics whether a game id is in the free set, so events carry a "free" flag.</summary>
         public Func<string, bool> IsGameFree = null;
 

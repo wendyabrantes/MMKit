@@ -13,7 +13,7 @@ namespace MightyMinds.Kit
     /// dashboards outside the stores: most-played games, completion, and which game leads to the paid unlock.
     ///
     /// Kids-app rules followed here: no advertising ID, no persistent device or user ID (a fresh random id per
-    /// app launch), no person profiles, no geo-IP lookup, and nothing is sent unless
+    /// app launch), no person profiles, no geo-IP lookup unless <see cref="MMKitConfig.AnalyticsCountry"/> is on, and nothing is sent unless
     /// <see cref="MMKitConfig.AnalyticsKey"/> is set.
     /// </summary>
     public static class KitAnalytics
@@ -83,7 +83,7 @@ namespace MightyMinds.Kit
             sb.Append("\"distinct_id\":").Append(Quote(sessionId ?? "unknown"));
             sb.Append(",\"$session_id\":").Append(Quote(sessionId ?? "unknown"));
             sb.Append(",\"$process_person_profile\":false");
-            sb.Append(",\"$geoip_disable\":true");
+            if (!cfg.AnalyticsCountry) sb.Append(",\"$geoip_disable\":true");
             sb.Append(",\"app\":").Append(Quote(cfg.AppName));
             sb.Append(",\"app_version\":").Append(Quote(Application.version));
             sb.Append(",\"platform\":").Append(Quote(Application.platform.ToString()));
