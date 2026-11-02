@@ -98,6 +98,7 @@ Pass `Localize` to translate. Keys: `kit.gate.title`, `kit.gate.hint`, `kit.revi
 Set `AnalyticsKey` (and `AnalyticsHost` for US projects) in `MMKitConfig`, then call:
 
 - `KitAnalytics.GameStarted(game, round)` / `GameCompleted(game, round, seconds)`
+- `KitAnalytics.GameRetried(game, round, seconds, midRound)` / `GameExited(game, round, seconds)` (funnel drop-off)
 - `KitAnalytics.PaywallShown(sourceGame)` / `PurchaseCompleted(sourceGame, productId)`
 
 Provide `IsGameFree` so game events carry a `free` flag. In PostHog, build insights on `game_started`
