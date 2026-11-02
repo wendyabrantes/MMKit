@@ -101,6 +101,9 @@ Set `AnalyticsKey` (and `AnalyticsHost` for US projects) in `MMKitConfig`, then 
 - `KitAnalytics.GameRetried(game, round, seconds, midRound)` / `GameExited(game, round, seconds)` (funnel drop-off)
 - `KitAnalytics.PaywallShown(sourceGame)` / `PurchaseCompleted(sourceGame, productId)`
 
+Every event carries `environment` (`editor`, `development`, `testflight` or `production`, detected automatically; override with
+`AnalyticsEnvironment`). Filter dashboards on `environment = production`.
+
 Provide `IsGameFree` so game events carry a `free` flag. In PostHog, build insights on `game_started`
 (breakdown by `game`, filter `free = true` for the most-played free game, `free = false` for paid), and on
 `paywall_shown` / `purchase_completed` broken down by `source_game` to see which game triggers the unlock.

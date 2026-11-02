@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -24,6 +25,32 @@ namespace MightyMinds.Kit
 
         static readonly List<string> queue = new List<string>();
         static string sessionId;
+        static string environment;
+
+#if UNITY_IOS && !UNITY_EDITOR
+        [DllImport("__Internal")] static extern bool MMKit_IsTestFlight();
+#endif
+
+        /// <summary>"editor", "development", "testflight" or "production" (or the config override). Added to every event
+        /// as the "environment" property so test data can be filtered out of the dashboards.</summary>
+        public static string Environment
+        {
+            get
+            {
+                if (environment != null) return environment;
+                if (!string.IsNullOrEmpty(MMKit.Config.AnalyticsEnvironment))
+                    return environment = MMKit.Config.AnalyticsEnvironment;
+#if UNITY_EDITOR
+                return environment = "editor";
+#else
+                if (Debug.isDebugBuild) return environment = "development";
+#if UNITY_IOS
+                try { if (MMKit_IsTestFlight()) return environment = "testflight"; } catch { }
+#endif
+                return environment = "production";
+#endif
+            }
+        }
         static Runner runner;
 
         /// <summary>False when no key is configured: events are only logged in the editor.</summary>
@@ -87,6 +114,7 @@ namespace MightyMinds.Kit
             sb.Append(",\"app\":").Append(Quote(cfg.AppName));
             sb.Append(",\"app_version\":").Append(Quote(Application.version));
             sb.Append(",\"platform\":").Append(Quote(Application.platform.ToString()));
+            sb.Append(",\"environment\":").Append(Quote(Environment));
             if (properties != null)
                 foreach (var (key, value) in properties)
                     if (!string.IsNullOrEmpty(key) && value != null)

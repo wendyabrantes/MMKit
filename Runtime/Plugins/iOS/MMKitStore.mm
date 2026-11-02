@@ -13,3 +13,10 @@ extern "C" bool MMKit_PresentCodeRedemptionSheet()
     }
     return false;
 }
+
+// True for TestFlight builds: their App Store receipt file is named "sandboxReceipt".
+extern "C" bool MMKit_IsTestFlight()
+{
+    NSURL *receipt = [[NSBundle mainBundle] appStoreReceiptURL];
+    return receipt != nil && [[receipt lastPathComponent] isEqualToString:@"sandboxReceipt"];
+}
