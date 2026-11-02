@@ -72,21 +72,22 @@ namespace MightyMinds.Kit
         // ── Events the games call ─────────────────────────────────────────────
 
         /// <summary>A mini game (round) began. <paramref name="game"/> is the stable id, e.g. the map node name.</summary>
-        public static void GameStarted(string game, int round)
-            => Track("game_started", ("game", game), ("round", round), FreeFlag(game));
+        public static void GameStarted(string game, int round, string roundName = null)
+            => Track("game_started", ("game", game), ("round", round), ("round_name", roundName), FreeFlag(game));
 
         /// <summary>A round was finished.</summary>
-        public static void GameCompleted(string game, int round, float seconds)
-            => Track("game_completed", ("game", game), ("round", round), ("seconds", Mathf.Round(seconds)), FreeFlag(game));
+        public static void GameCompleted(string game, int round, float seconds, string roundName = null)
+            => Track("game_completed", ("game", game), ("round", round), ("round_name", roundName),
+                ("seconds", Mathf.Round(seconds)), FreeFlag(game));
 
         /// <summary>The child restarted a round. <paramref name="midRound"/> is true when it was not yet won (a sign of being stuck).</summary>
-        public static void GameRetried(string game, int round, float seconds, bool midRound)
-            => Track("game_retried", ("game", game), ("round", round), ("seconds", Mathf.Round(seconds)),
+        public static void GameRetried(string game, int round, float seconds, bool midRound, string roundName = null)
+            => Track("game_retried", ("game", game), ("round", round), ("round_name", roundName), ("seconds", Mathf.Round(seconds)),
                 ("mid_round", midRound), FreeFlag(game));
 
         /// <summary>The child left a round for the map before winning it (back button).</summary>
-        public static void GameExited(string game, int round, float seconds)
-            => Track("game_exited", ("game", game), ("round", round), ("seconds", Mathf.Round(seconds)),
+        public static void GameExited(string game, int round, float seconds, string roundName = null)
+            => Track("game_exited", ("game", game), ("round", round), ("round_name", roundName), ("seconds", Mathf.Round(seconds)),
                 ("mid_round", true), FreeFlag(game));
 
         /// <summary>The unlock screen was shown; <paramref name="sourceGame"/> is the game that led to it.</summary>
