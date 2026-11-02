@@ -20,7 +20,7 @@ namespace MightyMinds.Kit
     public static class KitAnalytics
     {
         const int FlushAt = 15;
-        const float FlushSeconds = 20f;
+        const float FlushSeconds = 5f;   // events leave within a few seconds, so short sessions are not lost
         const int MaxQueued = 300;
 
         static readonly List<string> queue = new List<string>();
@@ -220,9 +220,13 @@ namespace MightyMinds.Kit
 
             void Update()
             {
+                // Send whatever is waiting once it has been queued for a few seconds
+                if (queue.Count == 0) { timer = 0f; return; }
                 timer += Time.unscaledDeltaTime;
                 if (timer >= FlushSeconds) { timer = 0f; FlushNow(); }
             }
+
+            void OnApplicationQuit() => FlushNow();
 
             void OnApplicationPause(bool paused)
             {
