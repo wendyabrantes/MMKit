@@ -146,10 +146,10 @@ namespace MightyMinds.Kit
         public static void ShowAbout() => Gated(SettingsView.Show);
 
         /// <summary>Send the player to the store's "write a review" page (gated).</summary>
-        public static void RateApp() => Gated(ReviewPrompter.OpenStoreReviewPage);
+        public static void RateApp() => Gated(() => { KitAnalytics.Track("rate_us_tapped"); ReviewPrompter.OpenStoreReviewPage(); });
 
         /// <summary>Open the Apple offer-code sheet / Google Play promo redemption page (gated).</summary>
-        public static void RedeemCode() => Gated(CodeRedemption.Open);
+        public static void RedeemCode() => Gated(() => { KitAnalytics.Track("redeem_code_tapped"); CodeRedemption.Open(); });
 
         /// <summary>Open an external link (gated).</summary>
         public static void OpenUrl(string url)

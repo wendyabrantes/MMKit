@@ -46,9 +46,10 @@ namespace MightyMinds.Kit
             PlayerPrefs.SetInt(PromptCountKey, PlayerPrefs.GetInt(PromptCountKey, 0) + 1);
             PlayerPrefs.Save();
 
+            KitAnalytics.Track("review_prompt_shown");
             MMKit.RequireGate(
-                () => { RequestReview(); onDone?.Invoke(); },
-                () => onDone?.Invoke(),
+                () => { KitAnalytics.Track("review_requested"); RequestReview(); onDone?.Invoke(); },
+                () => { KitAnalytics.Track("review_prompt_dismissed"); onDone?.Invoke(); },
                 MMKit.T("kit.review.gate_title", "Grown-ups: solve this to leave us a rating"));
             return true;
         }
