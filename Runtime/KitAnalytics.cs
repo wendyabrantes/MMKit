@@ -14,8 +14,11 @@ namespace MightyMinds.Kit
     /// Anonymous, privacy-safe usage events sent to a PostHog project (plain HTTPS, no SDK) so you can build
     /// dashboards outside the stores: most-played games, completion, and which game leads to the paid unlock.
     ///
-    /// Kids-app rules followed here: no advertising ID, no persistent device or user ID (a fresh random id per
-    /// app launch), no person profiles, no geo-IP lookup unless <see cref="MMKitConfig.AnalyticsCountry"/> is on, and nothing is sent unless
+    /// Kids-app rules followed here: no advertising ID and no device ID (never IDFA, IDFV or SystemInfo.deviceUniqueIdentifier).
+    /// Events carry a random id made by the app: a new one every launch, or, with <see cref="MMKitConfig.AnalyticsIdDays"/>,
+    /// one per install that is replaced after that many days, stored only on the device and removed on uninstall. Each launch
+    /// still has its own session id. No person profiles, no geo-IP lookup unless <see cref="MMKitConfig.AnalyticsCountry"/> is on,
+    /// nothing is sent while a parent has turned <see cref="KitSettings.AnalyticsEnabled"/> off, and nothing at all unless
     /// <see cref="MMKitConfig.AnalyticsKey"/> is set.
     /// </summary>
     public static class KitAnalytics
@@ -58,9 +61,65 @@ namespace MightyMinds.Kit
         public static bool IsConfigured =>
             MMKit.Config != null && !string.IsNullOrEmpty(MMKit.Config.AnalyticsKey);
 
+        // ── The install id ────────────────────────────────────────────────────
+        // These key names must never change: a new name would give every install a new id
+        const string IdKey = "mmkit.analytics_id";
+        const string IdBornKey = "mmkit.analytics_id_born";   // UTC day the id was made, as yyyy-MM-dd
+        static string installId;
+
+        /// <summary>The id events are counted under: the install id (renewed every AnalyticsIdDays) or, when that is 0,
+        /// this launch's session id.</summary>
+        static string DistinctId => installId ?? sessionId;
+
+        static void LoadInstallId()
+        {
+            installId = null;
+            int days = MMKit.Config != null ? MMKit.Config.AnalyticsIdDays : 0;
+            if (days <= 0 || !KitSettings.AnalyticsEnabled) { ForgetInstallId(); return; }
+
+            string id = PlayerPrefs.GetString(IdKey, "");
+            bool fresh = DateTime.TryParseExact(PlayerPrefs.GetString(IdBornKey, ""), "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                             DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out var born)
+                         && (DateTime.UtcNow.Date - born.Date).TotalDays < days;
+            if (string.IsNullOrEmpty(id) || !fresh)
+            {
+                id = Guid.NewGuid().ToString("N");
+                PlayerPrefs.SetString(IdKey, id);
+                PlayerPrefs.SetString(IdBornKey, DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+                PlayerPrefs.Save();
+            }
+            installId = id;
+        }
+
+        static void ForgetInstallId()
+        {
+            installId = null;
+            if (!PlayerPrefs.HasKey(IdKey) && !PlayerPrefs.HasKey(IdBornKey)) return;
+            PlayerPrefs.DeleteKey(IdKey);
+            PlayerPrefs.DeleteKey(IdBornKey);
+            PlayerPrefs.Save();
+        }
+
+        // A parent turned usage stats off: drop the id and anything not yet sent. Turned back on: a brand new id
+        static void OnSettingsChanged()
+        {
+            if (KitSettings.AnalyticsEnabled)
+            {
+                if (installId == null) LoadInstallId();
+            }
+            else
+            {
+                ForgetInstallId();
+                queue.Clear();
+            }
+        }
+
         internal static void Initialize()
         {
             sessionId = Guid.NewGuid().ToString("N");
+            LoadInstallId();
+            KitSettings.Changed -= OnSettingsChanged;
+            KitSettings.Changed += OnSettingsChanged;
             if (runner == null)
             {
                 var go = new GameObject("MMKit_Analytics");
@@ -132,7 +191,9 @@ namespace MightyMinds.Kit
 
                 string list = "[{\"type\":" + Quote(name) + ",\"value\":" + Quote(message) +
                               ",\"mechanism\":{\"handled\":false,\"synthetic\":false}" +
-                              ",\"stacktrace\":{\"type\":\"resolved\",\"frames\":" + frames + "}}]";
+                              // "raw": PostHog resolves the frames itself. "resolved" frames must carry PostHog's own
+                              // internal ids (raw_id) and are rejected without them, so issues were never grouped.
+                              ",\"stacktrace\":{\"type\":\"raw\",\"frames\":" + frames + "}}]";
 
                 var extra = new List<(string, object)>
                 {
@@ -191,13 +252,13 @@ namespace MightyMinds.Kit
         public static void Track(string name, params (string key, object value)[] properties)
         {
             var cfg = MMKit.Config;
-            if (cfg == null) return;
+            if (cfg == null || !KitSettings.AnalyticsEnabled) return;
 
             var sb = new StringBuilder(256);
             sb.Append("{\"event\":").Append(Quote(name));
             sb.Append(",\"timestamp\":").Append(Quote(DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture)));
             sb.Append(",\"properties\":{");
-            sb.Append("\"distinct_id\":").Append(Quote(sessionId ?? "unknown"));
+            sb.Append("\"distinct_id\":").Append(Quote(DistinctId ?? "unknown"));
             sb.Append(",\"$session_id\":").Append(Quote(sessionId ?? "unknown"));
             sb.Append(",\"$process_person_profile\":false");
             if (!cfg.AnalyticsCountry) sb.Append(",\"$geoip_disable\":true");

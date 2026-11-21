@@ -52,7 +52,7 @@ namespace MightyMinds.Kit
             }
             else
             {
-                bg.pixelsPerUnitMultiplier = 48f / size;   // rounds the corners into a circle
+                bg.pixelsPerUnitMultiplier = KitUI.RoundRadius * 2f / size;   // rounds the corners into a circle
 
                 var gear = KitUI.Rect("Gear", bg.transform);
                 var gearImg = gear.gameObject.AddComponent<Image>();

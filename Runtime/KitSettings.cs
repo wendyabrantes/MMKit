@@ -4,12 +4,13 @@ using UnityEngine;
 namespace MightyMinds.Kit
 {
     /// <summary>
-    /// Player-facing music preference, persisted in PlayerPrefs. Games read these (or subscribe to
-    /// <see cref="Changed"/>) and apply them to their own audio system.
+    /// Player-facing preferences (music, anonymous usage stats), persisted in PlayerPrefs. Games read these (or subscribe
+    /// to <see cref="Changed"/>) and apply them.
     /// </summary>
     public static class KitSettings
     {
         const string MusicKey = "mmkit.music";
+        const string AnalyticsKey = "mmkit.analytics";
 
         public static event Action Changed;
 
@@ -17,6 +18,13 @@ namespace MightyMinds.Kit
         {
             get => PlayerPrefs.GetInt(MusicKey, 1) == 1;
             set => Set(MusicKey, value);
+        }
+
+        /// <summary>A parent can turn anonymous usage stats off in the gated settings. Off: nothing is sent and the install id is deleted.</summary>
+        public static bool AnalyticsEnabled
+        {
+            get => PlayerPrefs.GetInt(AnalyticsKey, 1) == 1;
+            set => Set(AnalyticsKey, value);
         }
 
         static void Set(string key, bool value)

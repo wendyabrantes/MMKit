@@ -4,13 +4,15 @@ using UnityEngine;
 
 namespace MightyMinds.Kit
 {
-    /// <summary>One card on the settings screen ("Built for little hands" ...).</summary>
+    /// <summary>One card on the About page ("Built for little hands" ...).</summary>
     public sealed class AboutFeature
     {
         public string Title;
         public string Description;
-        /// <summary>Resources path of a small icon, e.g. "MMKit/hand_icon".</summary>
+        /// <summary>Resources path of a small white icon drawn on a coloured tile, e.g. "MMKit/Settings/hand".</summary>
         public string IconResource;
+        /// <summary>Colour of the icon tile. Left unset, the cards cycle teal, yellow and pink.</summary>
+        public Color TileColor;
     }
 
     /// <summary>One question and answer on the FAQ page.</summary>
@@ -30,12 +32,14 @@ namespace MightyMinds.Kit
         public string AppName        = null;                 // defaults to Application.productName
         public string Tagline        = null;
         public string CompanyName    = "Mighty Minds";
+        /// <summary>Shown in the About page footer as "© LegalName". Null falls back to CompanyName.</summary>
+        public string LegalName      = "Mighty Minds Games Ltd";
         public string AppleAppId     = null;                 // numeric App Store id, e.g. "1234567890"
         public string WebsiteUrl     = null;
         public string PrivacyPolicyUrl = null;
         public string TermsUrl       = null;
         public string SupportEmail   = null;
-        /// <summary>Logo shown at the top of the settings screen. Null loads Resources/MMKit/logo if present.</summary>
+        /// <summary>Art shown on the About page's light-blue hero tile. Null uses the kit's rainbow monster.</summary>
         public Sprite Logo           = null;
         /// <summary>Settings screen copy; null uses the Mighty Minds defaults.</summary>
         public string AboutIntro     = null;
@@ -55,6 +59,11 @@ namespace MightyMinds.Kit
         public Action RestorePurchases = null;
         /// <summary>Called with (key, englishFallback); return the localised string or null to use the fallback.</summary>
         public Func<string, string, string> Localize = null;
+        /// <summary>
+        /// Language for the kit's built-in translations ("es", "fr", "de", "it", "pt", "ru", "ja", "ko", "zh-Hans" or "en").
+        /// Null = the device language. <see cref="Localize"/> still wins when it returns a string.
+        /// </summary>
+        public string Language = null;
 
         // ── Analytics (optional) ──────────────────────────────────────────────
         /// <summary>PostHog project API key (starts with "phc_"). Null or empty = analytics off.</summary>
@@ -68,6 +77,11 @@ namespace MightyMinds.Kit
         public bool AnalyticsErrors = true;
         /// <summary>Overrides the automatic "environment" tag (editor / development / testflight / production).</summary>
         public string AnalyticsEnvironment = null;
+        /// <summary>How long one random install id is kept before a new one replaces it, so events from the same install can
+        /// be counted together (players per game, return visits) without building a long-term profile. The id is made by
+        /// the app, stored only on the device and removed on uninstall; it is never a device or advertising id.
+        /// 0 = a new id every app launch (nothing links one launch to the next).</summary>
+        public int AnalyticsIdDays = 0;
         /// <summary>Tells analytics whether a game id is in the free set, so events carry a "free" flag.</summary>
         public Func<string, bool> IsGameFree = null;
 
@@ -78,7 +92,7 @@ namespace MightyMinds.Kit
         public int MaxPrompts             = 3;
 
         // ── Look ──────────────────────────────────────────────────────────────
-        public TMP_FontAsset Font = null;                    // null = TMP default
+        public TMP_FontAsset Font = null;                    // null = bundled Nunito
         // Gate defaults follow the Mighty Minds puzzle game; the parent area uses Primary / Positive.
         public Color Primary   = new Color32(0x4A, 0x96, 0xFF, 255);   // blue: sidebar, links, toggle
         public Color Accent    = new Color32(0xA4, 0x5E, 0xE5, 255);   // purple
@@ -88,6 +102,7 @@ namespace MightyMinds.Kit
         public Color CardColor = Color.white;
         public Color TextColor = new Color32(0x2D, 0x34, 0x36, 255);
         public Sprite SettingsIcon = null;                   // null = bundled icon
+        public Sprite BackButton   = null;                   // null = drawn yellow circle; set to the game's own back button art
         public int   SortingOrder = 32000;
     }
 
@@ -166,6 +181,7 @@ namespace MightyMinds.Kit
         internal static string T(string key, string fallback)
         {
             string s = Config.Localize?.Invoke(key, fallback);
+            if (string.IsNullOrEmpty(s)) s = KitStrings.Get(key, fallback);
             return string.IsNullOrEmpty(s) ? fallback : s;
         }
     }
