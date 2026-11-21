@@ -269,7 +269,7 @@ namespace MightyMinds.Kit
             item.Fill = KitUI.Box("Fill", root, Color.white, true, 16f);
             Under(item.Fill.rectTransform, 0f);
 
-            var h = HStack(root.gameObject, new RectOffset(compact ? 8 : 14, compact ? 8 : 0, 0, 0), compact ? 8f : 12f);
+            var h = HStack(root.gameObject, new RectOffset(compact ? 8 : 14, compact ? 8 : 10, 0, 0), compact ? 8f : 12f);
             h.childAlignment = compact ? TextAnchor.MiddleCenter : TextAnchor.MiddleLeft;
 
             var iconRt = KitUI.Rect("Icon", root);
@@ -285,6 +285,14 @@ namespace MightyMinds.Kit
                 item.Label.enableAutoSizing = true;
                 item.Label.fontSizeMin = 11f;
                 item.Label.fontSizeMax = 15f;
+            }
+            else
+            {
+                // Sidebar: the label takes the row's leftover width and shrinks a little for long translations
+                Flexible(item.Label);
+                item.Label.enableAutoSizing = true;
+                item.Label.fontSizeMin = 13f;
+                item.Label.fontSizeMax = 17f;
             }
 
             var btn = item.Fill.gameObject.AddComponent<Button>();
