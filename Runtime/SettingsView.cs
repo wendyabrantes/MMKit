@@ -604,15 +604,21 @@ namespace MightyMinds.Kit
             var items = cfg.FaqItems ?? Defaults.Faq();
             var list = WhiteCard(content);
             VStack(list.gameObject, new RectOffset(0, 0, 0, 0), 0f);
+            // Questions about purchases only appear in apps that sell something. Each row keeps its original
+            // number, which its translation keys (kit.faq.q1, a1 ...) are tied to.
+            bool sells = cfg.RestorePurchases != null;
+            int shown = 0;
             for (int i = 0; i < items.Length; i++)
             {
-                if (i > 0)
+                if (items[i].AboutPurchases && !sells) continue;
+                if (shown > 0)
                 {
                     var line = KitUI.Box("Divider", list, Line, false);
                     line.raycastTarget = false;
                     Fixed(line.rectTransform, -1f, 1f);
                 }
-                FaqRow(list, items[i], i + 1, i == 0);
+                FaqRow(list, items[i], i + 1, shown == 0);
+                shown++;
             }
 
             string url = string.IsNullOrEmpty(cfg.FaqUrl) ? cfg.WebsiteUrl : cfg.FaqUrl;
@@ -911,11 +917,13 @@ namespace MightyMinds.Kit
                 new FaqItem
                 {
                     Question = "Is it a one-off payment or a subscription?",
+                    AboutPurchases = true,
                     Answer = "Our apps are a one-time purchase — no subscriptions. Some games are free to try before you unlock the rest."
                 },
                 new FaqItem
                 {
                     Question = "How do I restore my purchase?",
+                    AboutPurchases = true,
                     Answer = "Open Settings and tap Restore purchases, then sign in with the same App Store or Google Play account you bought with."
                 },
                 new FaqItem

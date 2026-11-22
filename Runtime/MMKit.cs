@@ -20,6 +20,8 @@ namespace MightyMinds.Kit
     {
         public string Question;
         public string Answer;
+        /// <summary>Only shown when the app sells something (<see cref="MMKitConfig.RestorePurchases"/> is set).</summary>
+        public bool AboutPurchases;
     }
 
     /// <summary>
